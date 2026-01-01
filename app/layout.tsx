@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AuthProvider } from "@/context/AuthContext";
+import { Providers } from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "Role-Based App",
@@ -14,7 +14,9 @@ export default function RootLayout({
   return (
     <html lang="en" style={{ height: '100%' }}>
       <body style={{ height: '100vh', margin: 0, padding: 0 }}>
-        <AuthProvider>{children}</AuthProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

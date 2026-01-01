@@ -13,12 +13,15 @@ export default function OpsDashboard() {
     const [routes, setRoutes] = useState<any[]>([]);
     const [routesLoading, setRoutesLoading] = useState(true);
 
-
-
     useEffect(() => {
         const fetchRoutes = async () => {
             try {
                 setRoutesLoading(true);
+                if (!db) {
+                    console.warn('Firestore not initialized; skipping routes fetch');
+                    setRoutes([]);
+                    return;
+                }
                 const q = query(collection(db, 'routes'), orderBy('routeName'));
                 const snap = await getDocs(q);
                 setRoutes(snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })));
@@ -87,21 +90,21 @@ export default function OpsDashboard() {
                             {staff.map(member => {
                                 const dynamicStatus = calculateComplianceStatus(member.licenseExpiryDate);
                                 return (
-                                <tr key={member.id} style={{ borderBottom: '1px solid #dee2e6' }}>
-                                    <td style={{ padding: '12px' }}>{member.staffName}</td>
-                                    <td style={{ padding: '12px' }}>{member.role}</td>
-                                    <td style={{ padding: '12px' }}>{member.dbsExpiryDate}</td>
-                                    <td style={{ padding: '12px' }}>{member.licenseExpiryDate}</td>
-                                    <td style={{
-                                        padding: '12px',
-                                        backgroundColor: getComplianceColor(dynamicStatus),
-                                        borderRadius: '4px',
-                                        fontWeight: 'bold'
-                                    }}>
-                                        {dynamicStatus}
-                                    </td>
-                                </tr>
-                            );
+                                    <tr key={member.id} style={{ borderBottom: '1px solid #dee2e6' }}>
+                                        <td style={{ padding: '12px' }}>{member.staffName}</td>
+                                        <td style={{ padding: '12px' }}>{member.role}</td>
+                                        <td style={{ padding: '12px' }}>{member.dbsExpiryDate}</td>
+                                        <td style={{ padding: '12px' }}>{member.licenseExpiryDate}</td>
+                                        <td style={{
+                                            padding: '12px',
+                                            backgroundColor: getComplianceColor(dynamicStatus),
+                                            borderRadius: '4px',
+                                            fontWeight: 'bold'
+                                        }}>
+                                            {dynamicStatus}
+                                        </td>
+                                    </tr>
+                                );
                             })}
                         </tbody>
                     </table>

@@ -25,6 +25,9 @@ export const useStaffCompliance = () => {
   const fetchStaff = async () => {
     try {
       setLoading(true);
+      if (!db) {
+        throw new Error('Firestore not initialized');
+      }
       const q = query(collection(db, 'staff_compliance'), orderBy('staffName'));
       const snapshot = await getDocs(q);
       const staffData = snapshot.docs.map(doc => ({
@@ -41,8 +44,9 @@ export const useStaffCompliance = () => {
   };
 
   // Add new staff record
-  const addStaff = async (staffData: Omit<StaffCompliance, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>) => {
+  const addStaff = async (staffData: Omit<StaffCompliance, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'| 'complianceStatus'>) => {
     try {
+      if (!db) throw new Error('Firestore not initialized');
       const docRef = await addDoc(collection(db, 'staff_compliance'), {
         ...staffData,
         createdAt: new Date(),
@@ -61,6 +65,7 @@ export const useStaffCompliance = () => {
   // Update staff record
   const updateStaff = async (staffId: string, staffData: Partial<StaffCompliance>) => {
     try {
+      if (!db) throw new Error('Firestore not initialized');
       const docRef = doc(db, 'staff_compliance', staffId);
       await updateDoc(docRef, {
         ...staffData,
@@ -78,6 +83,7 @@ export const useStaffCompliance = () => {
   // Delete staff record
   const deleteStaff = async (staffId: string) => {
     try {
+      if (!db) throw new Error('Firestore not initialized');
       await deleteDoc(doc(db, 'staff_compliance', staffId));
       console.log('✅ Staff deleted:', staffId);
       await fetchStaff();

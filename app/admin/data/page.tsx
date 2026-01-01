@@ -43,6 +43,7 @@ export default function DataPage() {
 
     const fetchRoutes = async () => {
         try {
+            if (!db) throw new Error('Firestore not initialized');
             const q = query(collection(db, 'routes'), orderBy('routeName'));
             const snapshot = await getDocs(q);
             const items = snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as RouteItem[];
@@ -63,21 +64,22 @@ export default function DataPage() {
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!isAdmin) return;
-        try {
-            setLoading(true);
-            const minutes = Number(plannedJourneyMinutes);
-            if (!plannedJourneyMinutes || isNaN(minutes)) {
-                alert('Please enter a valid planned journey time in minutes');
-                setLoading(false);
-                return;
-            }
-            await addDoc(collection(db, 'routes'), {
-                routeName,
-                plannedJourneyMinutes: minutes,
-                staffId,
-                approved: false,
-                createdAt: new Date(),
-            });
+            try {
+                setLoading(true);
+                const minutes = Number(plannedJourneyMinutes);
+                if (!plannedJourneyMinutes || isNaN(minutes)) {
+                    alert('Please enter a valid planned journey time in minutes');
+                    setLoading(false);
+                    return;
+                }
+                if (!db) throw new Error('Firestore not initialized');
+                await addDoc(collection(db, 'routes'), {
+                    routeName,
+                    plannedJourneyMinutes: minutes,
+                    staffId,
+                    approved: false,
+                    createdAt: new Date(),
+                });
             setRouteName('');
             setPlannedJourneyMinutes('');
             setStaffId('');
@@ -93,6 +95,7 @@ export default function DataPage() {
     const handleDelete = async (id: string) => {
         if (!isAdmin) return;
         try {
+            if (!db) throw new Error('Firestore not initialized');
             await deleteDoc(doc(db, 'routes', id));
             await fetchRoutes();
         } catch (err) {
@@ -103,6 +106,7 @@ export default function DataPage() {
     const handleApprove = async (route: RouteItem) => {
         if (!canApprove(route)) return;
         try {
+            if (!db) throw new Error('Firestore not initialized');
             const docRef = doc(db, 'routes', route.id);
             await updateDoc(docRef, { approved: true, approvedAt: new Date() });
             await fetchRoutes();

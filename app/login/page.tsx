@@ -35,7 +35,9 @@ export default function LoginPage() {
 
     try {
       console.log(`🔐 Attempting login for: ${email}`);
-      
+      if (!auth) {
+        throw new Error('Auth not initialized');
+      }
       await signInWithEmailAndPassword(auth, email, password);
       
       console.log('✅ Firebase authentication successful');
